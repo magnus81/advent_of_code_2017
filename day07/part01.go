@@ -15,45 +15,35 @@ func main() {
 
 	scanner := bufio.NewScanner(fh)
 
-	parents := []string{}
-	childs  := []string{}
+	parents   := make(map[string]int)
+	children  := make(map[string]int)
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		s := strings.Split(line, "->")
-		
-		if len(s) > 1 {
-			// this one has childs
-			tmp := strings.Split(s[1], ", ")
-			for _, v := range tmp {
-				childs = append(childs, strings.TrimSpace(v))
+		fields := strings.Fields(line)
+
+		if len(fields) > 2 {
+			// has children
+			parents[fields[0]] = 1
+			c := fields[3:]
+
+			for _, v := range c {
+				children[strings.Replace(v, ",", "", 1)] = 1
 			}
-			tmp_2 := strings.Split(s[0], " ")
-			parents = append(parents, tmp_2[0])
 		} else {
-			tmp := strings.Split(s[0], " ")
-			parents = append(parents, tmp[0])
+			parents[fields[0]] = 1
 		}
 	}
 
 	var found string
 
-	for _, v := range parents {
-		if !inArray(childs, v) {
-			found = v
+	for p := range parents {
+		_, ok := children[p]
+		if !ok {
+			found = p
 			break
 		}
 	}
 
 	fmt.Println(found)
-}
-
-func inArray(a []string, val string) bool {
-	for _, v := range a {
-		if val == v {
-			return true
-		}
-	}
-
-	return false
 }
